@@ -8,13 +8,13 @@ import {Menu} from "@material-ui/icons";
 
 export type FilterValuesType = "all" | "active" | "completed";
 
-export type TodoListType = {
+export type TodolistType = {
   id: string
   title: string
   filter: FilterValuesType
 }
 
-type TasksStateType = {
+export type TasksStateType = {
   [key: string]: Array<TaskType>
 }
 
@@ -22,7 +22,7 @@ function App() {
   let todoListId1 = v1()
   let todoListId2 = v1()
 
-  let [todolists, setTodoList] = useState<Array<TodoListType>>([
+  let [todolists, setTodoList] = useState<Array<TodolistType>>([
     {id: todoListId1, title: "What to buy", filter: "all"},
     {id: todoListId2, title: "What to learn", filter: "all"},
   ])
@@ -41,6 +41,46 @@ function App() {
     ]
   })
 
+  // functions for todoList
+  function changeFilter(value: FilterValuesType, todoLIstId: string) {
+    let todolist = todolists.find(tl => tl.id === todoLIstId);
+    if (todolist) {
+      todolist.filter = value
+      setTodoList([...todolists])
+    }
+  }
+  function addTodolist(title: string) {
+    let newTodolistId = v1();
+    let newTodolist: TodolistType = {
+      id: newTodolistId,
+      title: title,
+      filter: "all"
+    };
+    setTodoList([newTodolist, ...todolists]);
+    setTasks({
+      ...tasksObj,
+      [newTodolistId]: []
+    })
+  }
+  function removeTodoList (id: string) {
+    // засунем в стейт список тудулистов, id которых не равны тому, который нужно выкинуть
+    setTodoList(todolists.filter(tl => tl.id !== id));
+    // удалим таски для этого тудулиста из второго стейта, где мы храним отдельно таски
+    delete tasksObj[id] // удаляем св-во из объекта... значением которого являлся массив тасок
+    // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
+    setTasks({...tasksObj});
+  }
+  function changeTodolistTitle(id: string, newTitle: string) {
+    // найдём нужный todolist
+    const todolist = todolists.find(tl => tl.id === id);
+    if (todolist) {
+      // если нашёлся - изменим ему заголовок
+      todolist.title = newTitle;
+      setTodoList([...todolists])
+    }
+  }
+
+  // functions for tasks
   function removeTask(id: string, todolistId: string) {
     //достанем нужный массив по todolistId:
     let tasks = tasksObj[todolistId];
@@ -49,7 +89,6 @@ function App() {
     // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
     setTasks({...tasksObj});
   }
-
   function addTask(title: string, todolistId: string) {
     let task = {id: v1(), title: title, isDone: false};
     //достанем нужный массив по todolistId:
@@ -59,7 +98,6 @@ function App() {
     // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
     setTasks({...tasksObj});
   }
-
   function changeStatus(id: string, isDone: boolean, todolistId: string) {
     //достанем нужный массив по todolistId:
     let tasks = tasksObj[todolistId];
@@ -72,7 +110,6 @@ function App() {
       setTasks({...tasksObj});
     }
   }
-
   function changeTitle(id: string, newTitle: string, todolistId: string) {
     //достанем нужный массив по todolistId:
     let tasks = tasksObj[todolistId];
@@ -86,46 +123,6 @@ function App() {
     }
   }
 
-  function changeFilter(value: FilterValuesType, todoLIstId: string) {
-    let todolist = todolists.find(tl => tl.id === todoLIstId);
-    if (todolist) {
-      todolist.filter = value
-      setTodoList([...todolists])
-    }
-  }
-
-  let removeTodoList = (id: string) => {
-    // засунем в стейт список тудулистов, id которых не равны тому, который нужно выкинуть
-    setTodoList(todolists.filter(tl => tl.id !== id));
-    // удалим таски для этого тудулиста из второго стейта, где мы храним отдельно таски
-    delete tasksObj[id] // удаляем св-во из объекта... значением которого являлся массив тасок
-    // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
-    setTasks({...tasksObj});
-  }
-
-  function changeTodolistTitle(id: string, newTitle: string) {
-    // найдём нужный todolist
-    const todolist = todolists.find(tl => tl.id === id);
-    if (todolist) {
-      // если нашёлся - изменим ему заголовок
-      todolist.title = newTitle;
-      setTodoList([...todolists])
-    }
-  }
-
-  function addTodolist(title: string) {
-    let newTodolistId = v1();
-    let newTodolist: TodoListType = {
-      id: newTodolistId,
-      title: title,
-      filter: "all"
-    };
-    setTodoList([newTodolist, ...todolists]);
-    setTasks({
-      ...tasksObj,
-      [newTodolistId]: []
-    })
-  }
 
   return (
     <div className="App">
